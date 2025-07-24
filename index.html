@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Make.com GHL Field Mapper</title>
+    <style>
+	* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    color: white;
+    margin-bottom: 40px;
+}
+
+header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    font-weight: 400;
+}
+
+.workflow-steps {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 12px 20px;
+    border-radius: 25px;
+    color: white;
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.step-number {
+    background: #4CAF50;
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.main-content {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+.input-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+@media (max-width: 768px) {
+    .input-section {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.input-group label {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+
+.input-group h3 {
+    color: #2c3e50;
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.label-subtitle {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    font-weight: 400;
+}
+
+textarea {
+    width: 100%;
+    min-height: 200px;
+    padding: 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    resize: vertical;
+    transition: border-color 0.3s ease;
+}
+
+textarea:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+textarea::placeholder {
+    color: #adb5bd;
+    font-style: italic;
+}
+
+.json-info {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: #6c757d;
+    font-style: italic;
+}
+
+.action-section {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.process-btn {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+}
+
+.process-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+}
+
+.process-btn:disabled {
+    background: #bdc3c7;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.btn-icon {
+    font-size: 1.2rem;
+}
+
+.results-section {
+    border-top: 2px solid #e9ecef;
+    padding-top: 30px;
+}
+
+.mapping-preview {
+    margin-bottom: 30px;
+}
+
+.mapping-preview h3 {
+    color: #2c3e50;
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.mapping-stats {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid #4CAF50;
+}
+
+.mapping-list {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+}
+
+.mapping-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    border-bottom: 1px solid #f1f3f4;
+    font-size: 0.9rem;
+}
+
+.mapping-item:last-child {
+    border-bottom: none;
+}
+
+.mapping-item.matched {
+    background: #f8fff8;
+    border-left: 3px solid #4CAF50;
+}
+
+.mapping-item.unmatched {
+    background: #fff8f8;
+    border-left: 3px solid #f44336;
+}
+
+.field-label {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.field-ids {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+.arrow {
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+.output-section h3 {
+    color: #2c3e50;
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.output-actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.action-btn {
+    background: #667eea;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.action-btn:hover {
+    background: #5a6fd8;
+    transform: translateY(-1px);
+}
+
+#outputJson {
+    min-height: 200px;
+    font-size: 0.85rem;
+    background: #f8f9fa;
+}
+
+.instructions, .tips {
+    background: white;
+    border-radius: 16px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.instructions h3, .tips h3 {
+    color: #2c3e50;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.instructions ol {
+    padding-left: 20px;
+}
+
+.instructions li {
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+.instructions strong {
+    color: #4CAF50;
+}
+
+.tips ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.tips li {
+    position: relative;
+    padding-left: 25px;
+    margin-bottom: 10px;
+    line-height: 1.6;
+}
+
+.tips li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+/* Loading and status styles */
+.processing {
+    position: relative;
+    overflow: hidden;
+}
+
+.processing::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+.success-message {
+    background: #d4edda;
+    color: #155724;
+    padding: 12px 15px;
+    border-radius: 6px;
+    border: 1px solid #c3e6cb;
+    margin-bottom: 15px;
+}
+
+.error-message {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 12px 15px;
+    border-radius: 6px;
+    border: 1px solid #f5c6cb;
+    margin-bottom: 15px;
+}
+	</style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Make.com GHL Field Mapper</h1>
+            <p>Automatically map custom fields between Make.com scenarios for new GHL clients</p>
+        </header>
+
+        <div class="workflow-steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <span>Paste Source JSON</span>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <span>Paste Target JSON</span>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <span>Review Mappings</span>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <span>Download Updated JSON</span>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="input-section">
+                <div class="input-group">
+                    <label for="sourceJson">
+                        <h3>Source Scenario JSON (Working Template)</h3>
+                        <span class="label-subtitle">Paste your existing, working Make.com scenario JSON</span>
+                    </label>
+                    <textarea id="sourceJson" placeholder="Paste your source/template scenario JSON here..."></textarea>
+                    <div class="json-info" id="sourceInfo"></div>
+                </div>
+
+                <div class="input-group">
+                    <label for="targetJson">
+                        <h3>Target Scenario JSON (New Client)</h3>
+                        <span class="label-subtitle">Paste the new client's scenario JSON (after connecting to their GHL account)</span>
+                    </label>
+                    <textarea id="targetJson" placeholder="Paste your target/new client scenario JSON here..."></textarea>
+                    <div class="json-info" id="targetInfo"></div>
+                </div>
+            </div>
+
+            <div class="action-section">
+                <button id="processBtn" class="process-btn" disabled>
+                    <span class="btn-icon">🔄</span>
+                    Process Field Mappings
+                </button>
+            </div>
+
+            <div class="results-section" id="resultsSection" style="display: none;">
+                <div class="mapping-preview">
+                    <h3>Field Mappings Preview</h3>
+                    <div class="mapping-stats" id="mappingStats"></div>
+                    <div class="mapping-list" id="mappingList"></div>
+                </div>
+
+                <div class="output-section">
+                    <h3>Updated Scenario JSON</h3>
+                    <div class="output-actions">
+                        <button id="copyBtn" class="action-btn">
+                            <span class="btn-icon">📋</span>
+                            Copy to Clipboard
+                        </button>
+                        <button id="downloadBtn" class="action-btn">
+                            <span class="btn-icon">⬇️</span>
+                            Download JSON
+                        </button>
+                    </div>
+                    <textarea id="outputJson" readonly></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>How to Use</h3>
+            <ol>
+                <li><strong>Export Source JSON:</strong> In Make.com, go to your working scenario → Settings → Export blueprint → Copy the JSON</li>
+                <li><strong>Create New Scenario:</strong> Duplicate your scenario, connect to the new client's GHL account</li>
+                <li><strong>Export Target JSON:</strong> Export the blueprint from the new scenario (fields will have different IDs)</li>
+                <li><strong>Process:</strong> Paste both JSONs here and click "Process Field Mappings"</li>
+                <li><strong>Download:</strong> Get the updated JSON with correct field mappings</li>
+                <li><strong>Import:</strong> In Make.com, create a new scenario and import the updated blueprint</li>
+            </ol>
+        </div>
+
+        <div class="tips">
+            <h3>💡 Tips</h3>
+            <ul>
+                <li>Make sure both scenarios have the same custom field structure in GHL</li>
+                <li>The tool matches fields by their labels, so field names should be identical</li>
+                <li>Always test the imported scenario with sample data before going live</li>
+                <li>Keep backups of your original scenario blueprints</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+	class FieldMapper {
+    constructor() {
+        this.sourceData = null;
+        this.targetData = null;
+        this.fieldMappings = new Map();
+        this.initEventListeners();
+    }
+
+    initEventListeners() {
+        const sourceJson = document.getElementById('sourceJson');
+        const targetJson = document.getElementById('targetJson');
+        const processBtn = document.getElementById('processBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        sourceJson.addEventListener('input', () => this.validateJson('source'));
+        targetJson.addEventListener('input', () => this.validateJson('target'));
+        processBtn.addEventListener('click', () => this.processFieldMappings());
+        copyBtn.addEventListener('click', () => this.copyToClipboard());
+        downloadBtn.addEventListener('click', () => this.downloadJson());
+
+        // Initial validation
+        this.validateJson('source');
+        this.validateJson('target');
+    }
+
+    validateJson(type) {
+        const textarea = document.getElementById(`${type}Json`);
+        const infoDiv = document.getElementById(`${type}Info`);
+        const processBtn = document.getElementById('processBtn');
+
+        try {
+            if (!textarea.value.trim()) {
+                infoDiv.textContent = '';
+                this[`${type}Data`] = null;
+            } else {
+                const data = JSON.parse(textarea.value);
+                this[`${type}Data`] = data;
+                
+                // Extract scenario info
+                const scenarioName = data.name || 'Unknown Scenario';
+                const moduleCount = data.flow ? data.flow.length : 0;
+                
+                infoDiv.innerHTML = `
+                    <span style="color: #4CAF50;">✓ Valid JSON</span> | 
+                    <strong>${scenarioName}</strong> | 
+                    ${moduleCount} modules
+                `;
+            }
+        } catch (error) {
+            infoDiv.innerHTML = `<span style="color: #f44336;">✗ Invalid JSON: ${error.message}</span>`;
+            this[`${type}Data`] = null;
+        }
+
+        // Enable process button only if both JSONs are valid
+        processBtn.disabled = !(this.sourceData && this.targetData);
+    }
+
+    extractCustomFields(data) {
+        const customFields = new Map();
+        
+        if (!data.flow) return customFields;
+
+        // Look for HighLevel modules (createAContact, updateAContact)
+        data.flow.forEach(module => {
+            if (module.module && module.module.includes('highlevel')) {
+                // Check mapper for customField
+                if (module.mapper && module.mapper.customField) {
+                    Object.entries(module.mapper.customField).forEach(([fieldId, value]) => {
+                        if (fieldId && fieldId !== 'customField') {
+                            customFields.set(fieldId, { value, module: module.module });
+                        }
+                    });
+                }
+
+                // Check metadata expect for field labels
+                if (module.metadata && module.metadata.expect) {
+                    const customFieldSpec = module.metadata.expect.find(exp => exp.name === 'customField');
+                    if (customFieldSpec && customFieldSpec.spec) {
+                        customFieldSpec.spec.forEach(field => {
+                            if (field.name && field.label) {
+                                const existing = customFields.get(field.name) || {};
+                                customFields.set(field.name, {
+                                    ...existing,
+                                    label: field.label,
+                                    type: field.type
+                                });
+                            }
+                        });
+                    }
+                }
+            }
+        });
+
+        return customFields;
+    }
+
+    createFieldMappings() {
+        const sourceFields = this.extractCustomFields(this.sourceData);
+        const targetFields = this.extractCustomFields(this.targetData);
+        
+        this.fieldMappings.clear();
+        
+        // Create label to field ID maps
+        const sourceByLabel = new Map();
+        const targetByLabel = new Map();
+        
+        sourceFields.forEach((field, id) => {
+            if (field.label) {
+                sourceByLabel.set(field.label, { id, ...field });
+            }
+        });
+        
+        targetFields.forEach((field, id) => {
+            if (field.label) {
+                targetByLabel.set(field.label, { id, ...field });
+            }
+        });
+        
+        // Match fields by label
+        sourceByLabel.forEach((sourceField, label) => {
+            const targetField = targetByLabel.get(label);
+            if (targetField) {
+                this.fieldMappings.set(sourceField.id, {
+                    targetId: targetField.id,
+                    label: label,
+                    matched: true,
+                    sourceValue: sourceField.value
+                });
+            } else {
+                this.fieldMappings.set(sourceField.id, {
+                    targetId: null,
+                    label: label,
+                    matched: false,
+                    sourceValue: sourceField.value
+                });
+            }
+        });
+
+        return {
+            total: sourceFields.size,
+            matched: Array.from(this.fieldMappings.values()).filter(m => m.matched).length,
+            sourceFields: sourceFields.size,
+            targetFields: targetFields.size
+        };
+    }
+
+    displayMappings(stats) {
+        const mappingStats = document.getElementById('mappingStats');
+        const mappingList = document.getElementById('mappingList');
+        
+        // Display statistics
+        mappingStats.innerHTML = `
+            <strong>Mapping Results:</strong> 
+            ${stats.matched}/${stats.total} fields successfully mapped 
+            (${Math.round((stats.matched / stats.total) * 100)}% success rate)
+            <br>
+            <small>Source: ${stats.sourceFields} fields | Target: ${stats.targetFields} fields</small>
+        `;
+        
+        // Display individual mappings
+        mappingList.innerHTML = '';
+        
+        this.fieldMappings.forEach((mapping, sourceId) => {
+            const item = document.createElement('div');
+            item.className = `mapping-item ${mapping.matched ? 'matched' : 'unmatched'}`;
+            
+            item.innerHTML = `
+                <div class="field-label">${mapping.label || 'Unknown Field'}</div>
+                <div class="field-ids">
+                    <span>${sourceId}</span>
+                    <span class="arrow">${mapping.matched ? '→' : '✗'}</span>
+                    <span>${mapping.targetId || 'No match'}</span>
+                </div>
+            `;
+            
+            mappingList.appendChild(item);
+        });
+    }
+
+    updateTargetJson() {
+        const updatedData = JSON.parse(JSON.stringify(this.targetData));
+        
+        if (!updatedData.flow) return updatedData;
+        
+        updatedData.flow.forEach(module => {
+            if (module.module && module.module.includes('highlevel')) {
+                if (module.mapper && module.mapper.customField) {
+                    const newCustomField = {};
+                    
+                    // Map each field from source to target
+                    this.fieldMappings.forEach((mapping, sourceId) => {
+                        if (mapping.matched && mapping.targetId) {
+                            newCustomField[mapping.targetId] = mapping.sourceValue;
+                        }
+                    });
+                    
+                    // Keep any existing unmapped fields in target
+                    Object.entries(module.mapper.customField).forEach(([fieldId, value]) => {
+                        if (!Object.values(this.fieldMappings).some(m => m.targetId === fieldId)) {
+                            newCustomField[fieldId] = value;
+                        }
+                    });
+                    
+                    module.mapper.customField = newCustomField;
+                }
+            }
+        });
+        
+        return updatedData;
+    }
+
+    async processFieldMappings() {
+        const processBtn = document.getElementById('processBtn');
+        const resultsSection = document.getElementById('resultsSection');
+        
+        try {
+            // Show loading state
+            processBtn.disabled = true;
+            processBtn.classList.add('processing');
+            processBtn.innerHTML = '<span class="btn-icon">⏳</span>Processing...';
+            
+            // Simulate processing delay for better UX
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Create field mappings
+            const stats = this.createFieldMappings();
+            
+            // Display results
+            this.displayMappings(stats);
+            
+            // Generate updated JSON
+            const updatedJson = this.updateTargetJson();
+            document.getElementById('outputJson').value = JSON.stringify(updatedJson, null, 2);
+            
+            // Show results section
+            resultsSection.style.display = 'block';
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+            
+            // Show success message
+            this.showMessage('success', `Successfully processed ${stats.matched} field mappings!`);
+            
+        } catch (error) {
+            console.error('Processing error:', error);
+            this.showMessage('error', `Error processing mappings: ${error.message}`);
+        } finally {
+            // Reset button state
+            processBtn.disabled = false;
+            processBtn.classList.remove('processing');
+            processBtn.innerHTML = '<span class="btn-icon">🔄</span>Process Field Mappings';
+        }
+    }
+
+    async copyToClipboard() {
+        const outputJson = document.getElementById('outputJson');
+        const copyBtn = document.getElementById('copyBtn');
+        
+        try {
+            await navigator.clipboard.writeText(outputJson.value);
+            
+            // Visual feedback
+            const originalText = copyBtn.innerHTML;
+            copyBtn.innerHTML = '<span class="btn-icon">✓</span>Copied!';
+            copyBtn.style.background = '#4CAF50';
+            
+            setTimeout(() => {
+                copyBtn.innerHTML = originalText;
+                copyBtn.style.background = '#667eea';
+            }, 2000);
+            
+        } catch (error) {
+            // Fallback for older browsers
+            outputJson.select();
+            document.execCommand('copy');
+            this.showMessage('success', 'JSON copied to clipboard!');
+        }
+    }
+
+    downloadJson() {
+        const outputJson = document.getElementById('outputJson');
+        const scenarioName = this.targetData.name || 'scenario';
+        
+        const blob = new Blob([outputJson.value], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${scenarioName.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_updated.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        URL.revokeObjectURL(url);
+        
+        this.showMessage('success', 'JSON file downloaded successfully!');
+    }
+
+    showMessage(type, message) {
+        // Remove existing messages
+        document.querySelectorAll('.success-message, .error-message').forEach(el => el.remove());
+        
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `${type}-message`;
+        messageDiv.textContent = message;
+        
+        const resultsSection = document.getElementById('resultsSection');
+        resultsSection.insertBefore(messageDiv, resultsSection.firstChild);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (messageDiv.parentNode) {
+                messageDiv.remove();
+            }
+        }, 5000);
+    }
+}
+
+// Initialize the field mapper when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new FieldMapper();
+});
+	</script>
+</body>
+</html>
